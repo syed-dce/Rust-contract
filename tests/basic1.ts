@@ -10,8 +10,8 @@ describe("basic1", () => {
 
   const program = anchor.workspace.Basic1 as Program<Basic1>;
 
+  const myAccount = anchor.web3.Keypair.generate();
   it("Is initialized!", async () => {
-    const myAccount = anchor.web3.Keypair.generate();
     // Add your test here.
     // const tx = await program.methods.initialize().rpc();
 
@@ -43,9 +43,64 @@ describe("basic1", () => {
     const account = await program.account.myAccount.fetch(myAccount.publicKey);
 
     // console.log(account);
-    assert.ok(account.data.eq(new anchor.BN(0)));
+    // assert.ok(account.data.eq(new anchor.BN(0)));
+    assert.equal(account.data, 0);
+  });
 
-    console.log("Your transaction signature");
+  it("Is updated!", async () => {
+    // Add your test here.
+
+    await program.methods
+      .update(new anchor.BN(21))
+      .accounts({
+        myAccount: myAccount.publicKey,
+      })
+      .rpc();
+
+    const account = await program.account.myAccount.fetch(myAccount.publicKey);
+    assert.equal(account.data, 21);
+  });
+
+  it("Is incremented!", async () => {
+    // Add your test here.
+    const account = await program.account.myAccount.fetch(myAccount.publicKey);
+    await program.methods
+      .increment()
+      .accounts({
+        myAccount: myAccount.publicKey,
+      })
+      .rpc();
+
+    const accountAfterIncrement = await program.account.myAccount.fetch(
+      myAccount.publicKey
+    );
+    // console.log(account.data.toNumber());
+    assert.equal(
+      account.data.toNumber() + 1,
+      accountAfterIncrement.data.toNumber()
+    );
+    // assert.equal(account.data.toNumber() + 1, accountAfterIncrement.data );
+  });
+
+  it("Is decremented!", async () => {
+    // Add your test here.
+    const account = await program.account.myAccount.fetch(myAccount.publicKey);
+    await program.methods
+      .decrement()
+      .accounts({
+        myAccount: myAccount.publicKey,
+      })
+      .rpc();
+
+    const accountAfterIncrement = await program.account.myAccount.fetch(
+      myAccount.publicKey
+    );
+    
+    assert.equal(
+      account.data.toNumber() - 1,
+      accountAfterIncrement.data.toNumber()
+    );
+    
   });
 });
 
